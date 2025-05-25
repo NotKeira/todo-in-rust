@@ -1,64 +1,37 @@
-use std::fmt;
+mod tasks;
+mod ui;
 
-struct Task {
-    id: usize,
-    description: String,
-    done: bool,
-}
+use crossterm::event::{KeyCode, KeyEventKind};
+use tasks::{Task, TaskList};
+use ui::{App, EventHandler, Tui};
 
-struct TaskList {
-    tasks: Vec<Task>,
-}
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut task_list = TaskList::new();
+    task_list.add(Task::new(1, "Learn Rust structs"))?;
+    task_list.add(Task::new(2, "Implement a task list"))?;
 
-impl fmt::Display for Task {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let status = if self.done { "[X]" } else { "[ ]" };
-        write!(f, "{} {}", status, self.description)
-    }
-}
+    let mut app = App::new(task_list);
+    let events = EventHandler::new();
+    let mut tui = Tui::new()?;
 
-impl TaskList {
-    fn add(&mut self, task: Task) {
-        self.tasks.push(task);
-    }
+    while app.running {
+        tui.draw(&mut app)?;
 
-    fn show(&self) {
-        for task in &self.tasks {
-            println!("{task}");
-        }
-    }
-}
-
-impl Task {
-    /// makea a new taskie
-    fn new(id: usize, desc: impl Into<String>) -> Self {
-        Self {
-            id,
-            description: desc.into(),
-            done: false,
+        match events.next()? {
+            ui::Event::Key(key) => {
+                if key.kind == KeyEventKind::Press {
+                    match key.code {
+                        KeyCode::Char('q') => app.quit(),
+                        KeyCode::Down => app.select_next(),
+                        KeyCode::Up => app.select_previous(),
+                        KeyCode::Enter => app.toggle_selected_task(),
+                        _ => {}
+                    }
+                }
+            }
+            ui::Event::Tick => {}
         }
     }
 
-    /// mark a de taskie as de completeh
-    fn complete(&mut self) {
-        self.done = true;
-    }
-
-    /// send de task to de consolio
-    fn print(&self) {
-        println!("{self}");
-    }
-}
-
-fn main() {
-    let mut todo = vec![
-        Task::new(1, "Learn Rust structs"),
-        Task::new(1, "Implement a task list"),
-    ];
-
-    todo[0].complete();
-
-    for task in &todo {
-        task.print();
-    }
+    Ok(())
 }
