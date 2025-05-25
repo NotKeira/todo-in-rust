@@ -1,16 +1,16 @@
-use std::io::{self, Stdout};
+use crate::ui::App;
 use crossterm::{
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{
     Terminal,
     backend::CrosstermBackend,
+    layout::{Constraint, Direction, Layout},
+    style::{Color, Style},
     widgets::{Block, Borders, List, ListItem},
-    style::{Style, Color},
-    layout::{Layout, Constraint, Direction},
 };
-use crate::ui::App;
+use std::io::{self, Stdout};
 
 pub struct Tui {
     terminal: Terminal<CrosstermBackend<Stdout>>,
@@ -45,11 +45,7 @@ impl Tui {
                 .highlight_style(Style::default().bg(Color::White).fg(Color::Black))
                 .highlight_symbol("> ");
 
-            frame.render_stateful_widget(
-                tasks,
-                chunks[0],
-                &mut app.list_state,
-            );
+            frame.render_stateful_widget(tasks, chunks[0], &mut app.list_state);
         })?;
         Ok(())
     }
