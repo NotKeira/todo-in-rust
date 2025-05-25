@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tui = Tui::new()?;
 
     while app.running {
-        tui.draw(&mut app)?;
+        tui.draw(&app)?;
 
         match events.next()? {
             ui::Event::Key(key) => {
