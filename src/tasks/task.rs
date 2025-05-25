@@ -15,10 +15,6 @@ impl Task {
             done: false,
         }
     }
-
-    pub fn complete(&mut self) {
-        self.done = true;
-    }
 }
 
 impl fmt::Display for Task {

@@ -1,12 +1,9 @@
-use ratatui::widgets::ListState;
-
 use crate::tasks::TaskList;
 
 pub struct App {
     pub task_list: TaskList,
     pub running: bool,
     pub selected: Option<usize>,
-    pub list_state: ListState,
 }
 
 impl App {
@@ -15,10 +12,8 @@ impl App {
             task_list,
             running: true,
             selected: None,
-            list_state: ListState::default(),
         }
     }
-
     pub fn quit(&mut self) {
         self.running = false;
     }
@@ -57,7 +52,7 @@ impl App {
         if let Some(selected) = self.selected {
             if let Some(task) = self.task_list.list().get(selected) {
                 let id = task.id;
-                let _ = self.task_list.complete(id);
+                let _ = self.task_list.toggle(id);
             }
         }
     }
