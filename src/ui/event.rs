@@ -1,4 +1,4 @@
-use crossterm::event::{self, Event as CrosstermEvent, KeyEvent, KeyCode};
+use crossterm::event::{self, Event as CrosstermEvent, KeyEvent};
 use std::time::Duration;
 
 pub enum Event {

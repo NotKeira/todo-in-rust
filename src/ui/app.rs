@@ -2,8 +2,6 @@ use ratatui::widgets::ListState;
 
 use crate::tasks::TaskList;
 
-pub type AppResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 pub struct App {
     pub task_list: TaskList,
     pub running: bool,
