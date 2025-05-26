@@ -1,4 +1,4 @@
-use crate::ui::App;
+use crate::ui::{App, InputMode};
 use crossterm::{
     ExecutableCommand,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
@@ -39,7 +39,8 @@ impl Tui {
                     [
                         Constraint::Length(3), // Header
                         Constraint::Min(3),    // Tasks
-                        Constraint::Length(5), // Footer
+                        Constraint::Length(3), // Input
+                        Constraint::Length(7), // Footer (increased height for wrapped controls)
                     ]
                     .as_ref(),
                 )
@@ -80,13 +81,36 @@ impl Tui {
             }
             frame.render_stateful_widget(tasks, chunks[1], &mut self.list_state);
 
-            // Footer
-            let controls = ["↑/↓: Navigate", "Enter: Toggle completion", "q: Quit"].join("\n");
+            // Input field
+            let input = Paragraph::new(app.input.to_string())
+                .style(match app.input_mode {
+                    InputMode::Normal => Style::default(),
+                    InputMode::Adding => Style::default().fg(Color::Yellow),
+                })
+                .block(Block::default().borders(Borders::ALL).title("New Task"));
+            frame.render_widget(input, chunks[2]);
 
-            let footer = Paragraph::new(controls)
+            // Show cursor when adding
+            if let InputMode::Adding = app.input_mode {
+                frame.set_cursor(chunks[2].x + app.input.len() as u16 + 1, chunks[2].y + 1)
+            }
+
+            // Updated controls list
+            let controls = match app.input_mode {
+                InputMode::Normal => vec![
+                    "↑/↓: Navigate",
+                    "Enter: Toggle completion",
+                    "a: Add task",
+                    "d: Delete selected",
+                    "q: Quit",
+                ],
+                InputMode::Adding => vec!["Enter: Submit task", "Esc: Cancel"],
+            };
+
+            let footer = Paragraph::new(controls.join("\n"))
                 .style(Style::default().fg(Color::Gray))
                 .block(Block::default().borders(Borders::ALL).title("Controls"));
-            frame.render_widget(footer, chunks[2]);
+            frame.render_widget(footer, chunks[3]);
         })?;
         Ok(())
     }

@@ -3,36 +3,36 @@ use super::{Task, TaskError};
 #[derive(Debug, Default)]
 pub struct TaskList {
     tasks: Vec<Task>,
+    next_id: usize,
 }
 
 impl TaskList {
     pub fn new() -> Self {
-        Self { tasks: Vec::new() }
+        Self {
+            tasks: Vec::new(),
+            next_id: 1,
+        }
     }
 
-    pub fn add(&mut self, task: Task) -> Result<(), TaskError> {
-        if self.tasks.iter().any(|t| t.id == task.id) {
-            return Err(TaskError::DuplicateId(task.id));
-        }
+    pub fn add(&mut self, description: impl Into<String>) -> Result<(), TaskError> {
+        let task = Task::new(self.next_id, description);
+        self.next_id += 1;
         self.tasks.push(task);
         Ok(())
     }
 
-    // pub fn complete(&mut self, id: usize) -> Result<(), TaskError> {
-    //     self.tasks
-    //         .iter_mut()
-    //         .find(|t| t.id == id)
-    //         .ok_or(TaskError::NotFound(id))
-    //         .map(|task| {
-    //             task.done = true;
-    //             Ok(())
-    //         })
-    //         .unwrap_or_else(|_| Err(TaskError::NotFound(id)))
-    // }
-
     pub fn toggle(&mut self, id: usize) -> Result<(), TaskError> {
         if let Some(task) = self.tasks.iter_mut().find(|t| t.id == id) {
             task.done = !task.done;
+            Ok(())
+        } else {
+            Err(TaskError::NotFound(id))
+        }
+    }
+
+    pub fn remove(&mut self, id: usize) -> Result<(), TaskError> {
+        if let Some(pos) = self.tasks.iter().position(|t| t.id == id) {
+            self.tasks.remove(pos);
             Ok(())
         } else {
             Err(TaskError::NotFound(id))
